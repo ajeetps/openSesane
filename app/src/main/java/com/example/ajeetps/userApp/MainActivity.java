@@ -18,24 +18,35 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.io.*;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
+import android.accounts.Account;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
+import com.google.android.gms.nearby.messages.MessageFilter;
+import com.google.android.gms.nearby.messages.MessageListener;
+import com.google.android.gms.nearby.messages.NearbyMessagesStatusCodes;
+import com.google.android.gms.nearby.messages.Strategy;
+import com.google.android.gms.nearby.messages.Message;
 
 public class MainActivity extends Activity implements OnClickListener,
         ConnectionCallbacks, OnConnectionFailedListener {
 
     private static final int RC_SIGN_IN = 0;
     // Logcat tag
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "Open Sesame";
 
     // Profile pic image size in pixels
     private static final int PROFILE_PIC_SIZE = 400;
@@ -58,6 +69,7 @@ public class MainActivity extends Activity implements OnClickListener,
     private ImageView imgProfilePic;
     private TextView txtName, txtEmail;
     private LinearLayout llProfileLayout;
+    private NearbyApiManager nearbyApiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,13 +89,56 @@ public class MainActivity extends Activity implements OnClickListener,
         btnSignOut.setOnClickListener(this);
         btnRevokeAccess.setOnClickListener(this);
 
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this).addApi(Plus.API)
+//                .addScope(Plus.SCOPE_PLUS_LOGIN).build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this).addApi(Plus.API)
-                .addScope(Plus.SCOPE_PLUS_LOGIN).build();
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(new Scope(Scopes.PROFILE))
+                .addScope(new Scope(Scopes.PLUS_LOGIN))
+                .addScope(new Scope(Scopes.PLUS_ME))
+                .build();
+        nearbyApiManager = new NearbyApiManager(this, new BeaconVisibilityListener());
+    }
+
+
+
+    private class BeaconVisibilityListener extends MessageListener {
+
+        @Override
+        public void onFound(final Message message) {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(
+                            MainActivity.this, "Beacon found " + message.toString(), Toast.LENGTH_SHORT).show();
+
+                }
+            });
+            Log.i(TAG, "Found beacon: " + message);
+
+        }
+
+        // Called when a message is no longer nearby.
+        @Override
+        public void onLost(final Message message) {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this, "Beacon lost" + message.toString(), Toast.LENGTH_SHORT)
+                            .show();
+                }
+            });
+            Log.i(TAG, "Lost beacon: " + message);
+
+        }
     }
 
     protected void onStart() {
+        Log.e(TAG, "signing in 5");
         super.onStart();
         mGoogleApiClient.connect();
     }
@@ -100,10 +155,13 @@ public class MainActivity extends Activity implements OnClickListener,
      * Method to resolve any signin errors
      * */
     private void resolveSignInError() {
+        Log.e(TAG, "signing in 2");
         if (mConnectionResult.hasResolution()) {
+            Log.e(TAG, "signing in 3");
             try {
                 mIntentInProgress = true;
                 mConnectionResult.startResolutionForResult(this, RC_SIGN_IN);
+                Log.e(TAG, "signing in 4");
             } catch (SendIntentException e) {
                 mIntentInProgress = false;
                 mGoogleApiClient.connect();
@@ -152,6 +210,7 @@ public class MainActivity extends Activity implements OnClickListener,
     @Override
     public void onConnected(Bundle arg0) {
         mSignInClicked = false;
+        Log.i(TAG, "onConnected:" + arg0);
         Toast.makeText(this, "User is connected!", Toast.LENGTH_LONG).show();
 
         // Get user's information
@@ -167,11 +226,13 @@ public class MainActivity extends Activity implements OnClickListener,
      * */
     private void updateUI(boolean isSignedIn) {
         if (isSignedIn) {
+            Log.e(TAG, "signing in 6");
             btnSignIn.setVisibility(View.GONE);
             btnSignOut.setVisibility(View.VISIBLE);
             btnRevokeAccess.setVisibility(View.VISIBLE);
             llProfileLayout.setVisibility(View.VISIBLE);
         } else {
+            Log.e(TAG, "signing in 7");
             btnSignIn.setVisibility(View.VISIBLE);
             btnSignOut.setVisibility(View.GONE);
             btnRevokeAccess.setVisibility(View.GONE);
@@ -184,7 +245,9 @@ public class MainActivity extends Activity implements OnClickListener,
      * */
     private void getProfileInformation() {
         try {
+            Log.e(TAG, "signing in 8");
             if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
+                Log.e(TAG, "signing in 9");
                 Person currentPerson = Plus.PeopleApi
                         .getCurrentPerson(mGoogleApiClient);
                 String personName = currentPerson.getDisplayName();
@@ -199,6 +262,38 @@ public class MainActivity extends Activity implements OnClickListener,
                 txtName.setText(personName);
                 txtEmail.setText(email);
 
+                AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
+                    @Override
+                    protected String doInBackground(Void... params) {
+                        String accountName = Plus.AccountApi.getAccountName(mGoogleApiClient);
+                        Account account = new Account(accountName, GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
+                        String scopes = "audience:server:client_id:" + "7158014523-4mmqj2i9ah7j6kp5u7gse48elada74j8.apps.googleusercontent.com"; // Not the app's client ID.
+                        String Auth ="";
+                        GoogleAccountCredential credential;
+                        try {
+
+                            Log.e(TAG, "signing in 9");
+                            Auth = GoogleAuthUtil.getToken(getApplicationContext(), account, scopes);
+
+                            Log.e(TAG, "signing in 9");
+                        } catch (IOException e) {
+                            Log.e(TAG, "signing in e1");
+                            Log.e(TAG, "Error retrieving ID token.", e);
+                        } catch (GoogleAuthException e) {
+                            Log.e(TAG, "signing in e2");
+                            Log.e(TAG, "Error retrieving ID token.", e);
+                        }
+                        Log.e(TAG,Auth + " ajeet 11");
+                        return Auth;
+                    }
+
+                    @Override
+                    protected void onPostExecute(String token) {
+                        Log.i(TAG, "Access token retrieved:" );
+                    }
+
+                };
+                task.execute();
                 // by default the profile url gives 50x50 px image only
                 // we can replace the value with whatever dimension we want by
                 // replacing sz=X
@@ -209,6 +304,7 @@ public class MainActivity extends Activity implements OnClickListener,
                 new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
 
             } else {
+                Log.e(TAG, "signing in 10");
                 Toast.makeText(getApplicationContext(),
                         "Person information is null", Toast.LENGTH_LONG).show();
             }
@@ -255,7 +351,9 @@ public class MainActivity extends Activity implements OnClickListener,
      * Sign-in into google
      * */
     private void signInWithGplus() {
+        Log.e(TAG, "signing in");
         if (!mGoogleApiClient.isConnecting()) {
+            Log.e(TAG, "signing in 1");
             mSignInClicked = true;
             resolveSignInError();
         }
