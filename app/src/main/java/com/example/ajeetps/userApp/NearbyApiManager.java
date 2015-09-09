@@ -87,12 +87,13 @@ public class NearbyApiManager implements ConnectionCallbacks, OnConnectionFailed
     public void subscribe() {
         MessageFilter filter = new MessageFilter.Builder()
                 // Include whichever of these you are interested in (or all of them, or none):
-                .includeNamespacedType("com.google.location.locus", "googleLocationId")
-                .includeNamespacedType("com.google.location.locus", "googleRoomOrgstoreName")
-                .includeNamespacedType("com.google.location.locus", "googleRoomOrgstoreType")
-                .includeNamespacedType("com.google.location.locus", "googleRoomFeatureId")
+                //.includeNamespacedType("com.google.location.locus", "googleLocationId")
+                //.includeNamespacedType("com.google.location.locus", "googleRoomOrgstoreName")
+                //.includeNamespacedType("com.google.location.locus", "googleRoomOrgstoreType")
+                //.includeNamespacedType("com.google.location.locus", "googleRoomFeatureId")
+                .includeNamespacedType("open-sesame-1050", "opensesame")
                         // If you've added your own attachments (see "add your attachments" below):
-                .includeAllMyTypes()
+                //.includeAllMyTypes()
                 .build();
         if (googleApiClient != null) {
             Nearby.Messages.subscribe(googleApiClient, messageListener, Strategy.BLE_ONLY, filter)
