@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -215,72 +216,10 @@ public class MainActivity extends CommonUtil implements
         Log.i(TAG, "Nearby: onMessageReceived:" + endPointId + ":" + new String(payload));
         mDoorKey = new String(payload);
 
-        askForDoorOpen();
+//        askForDoorOpen(this);
+        new AskForDoorOpen().askForDoorOpen(this, mEmail, mDoorId, mDoorKey);
     }
 
-    private void askForDoorOpen() {
-        AsyncTask<Void, Void, String> task1 = new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                Log.e(TAG, "http response 1");
-                String response = "";
-
-                try {
-
-
-                    URL url = new URL("http://hangouts-xml.appspot.com/authdoor");
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setReadTimeout(10000);
-                    conn.setConnectTimeout(15000);
-                    conn.setRequestMethod("POST");
-                    conn.setDoInput(true);
-                    conn.setDoOutput(true);
-
-                    HashMap<String, String> param = new HashMap<String, String>();
-
-                    param.put("email", mEmail);
-                    param.put("doorId", mDoorId);
-                    param.put("doorKey", mDoorKey);
-
-
-                    OutputStream os = conn.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(
-                            new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(getPostDataString(param));
-                    writer.flush();
-                    writer.close();
-                    os.close();
-
-                    int responseCode = conn.getResponseCode();
-
-                    if (responseCode == HttpsURLConnection.HTTP_OK) {
-                        String line;
-                        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                        while ((line = br.readLine()) != null) {
-                            response += line;
-                        }
-                    } else {
-                        response = "";
-                    }
-                    Log.e(TAG, "http response" + response);
-                } catch (java.io.IOException e) {
-                    if (e.getMessage().contains("authentication challenge")) {
-                    } else {
-                        Log.e(TAG, "http response" + e.getStackTrace());
-                    }
-                }
-                return response;
-
-            }
-            @Override
-            protected void onPostExecute(String response) {
-                Log.i(TAG, "Access token retrieved:" + response);
-            }
-
-        };
-
-        task1.execute();
-    }
 
     @Override
     public void onDisconnected(String s) {
@@ -299,7 +238,8 @@ public class MainActivity extends CommonUtil implements
                             MainActivity.this, "Beacon found " + mDoorId, Toast.LENGTH_SHORT).show();
                     //startDiscovery();
                     mDoorKey = "doortemporarykey";
-                    askForDoorOpen();
+//                    askForDoorOpen(MainActivity.this);
+                    new AskForDoorOpen().askForDoorOpen(MainActivity.this, mEmail, mDoorId, mDoorKey);
                 }
             });
             Log.i(TAG, "Found beacon: " + message);
@@ -442,7 +382,7 @@ public class MainActivity extends CommonUtil implements
             btnSignOut.setVisibility(View.VISIBLE);
             //btnRevokeAccess.setVisibility(View.VISIBLE);
             llProfileLayout.setVisibility(View.VISIBLE);
-            //btnnearByClient.setVisibility(View.VISIBLE);
+            btnnearByClient.setVisibility(View.VISIBLE);
         } else {
             Log.e(TAG, "signing in 7");
             btnSignIn.setVisibility(View.VISIBLE);
@@ -535,23 +475,6 @@ public class MainActivity extends CommonUtil implements
         }
     }
 
-    private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException{
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for(Map.Entry<String, String> entry : params.entrySet()){
-            if (first)
-                first = false;
-            else
-                result.append("&");
-
-            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-        }
-
-        return result.toString();
-    }
-
     @Override
     public void onConnectionSuspended(int arg0) {
         mGoogleApiClient.connect();
@@ -635,8 +558,11 @@ public class MainActivity extends CommonUtil implements
 
     private void invokeNearByClient() {
         Log.i(TAG, "Kishore: Starting Client Activity");
-        Intent detailIntent = new Intent(this, NearByClientActivity.class);
-        startActivity(detailIntent);
+        new AskForDoorOpen().askForDoorOpen(MainActivity.this, mEmail, mDoorId, mDoorKey);
+
+//        askForDoorOpen(this);
+//        Intent detailIntent = new Intent(this, NearByClientActivity.class);
+//        startActivity(detailIntent);
     }
         /**
          * Background Async task to load user profile picture from url
