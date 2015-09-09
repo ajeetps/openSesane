@@ -29,6 +29,7 @@ public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
     DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
             context.getSystemService(Context.DEVICE_POLICY_SERVICE);
     Log.w(TAG, "Password attempt successful.");
+
   }
 
   @Override
@@ -36,5 +37,7 @@ public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
     DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
             context.getSystemService(Context.DEVICE_POLICY_SERVICE);
     Log.w(TAG, "Password attempt failed.");
+
+
   }
 }
