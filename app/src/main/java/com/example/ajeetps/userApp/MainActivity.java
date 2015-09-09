@@ -102,8 +102,17 @@ public class MainActivity extends Activity implements OnClickListener,
                 .addScope(new Scope(Scopes.PLUS_ME))
                 .build();
         nearbyApiManager = new NearbyApiManager(this, new BeaconVisibilityListener());
+
+        enableDeviceAdmin();
     }
 
+    private void enableDeviceAdmin() {
+        IDevicePolicyManager devicePolicyManager = AndroidApiFactory.getDevicePolicyManager(this);
+        if (!devicePolicyManager.isAdminActive(DeviceAdminReceiver.getComponentName(this))) {
+            Intent intent = new Intent(this, ActivateDeviceAdminActivity.class);
+            startActivity(intent);
+        }
+    }
 
 
     private class BeaconVisibilityListener extends MessageListener {
