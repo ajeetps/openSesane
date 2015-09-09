@@ -106,6 +106,9 @@ public class MainActivity extends Activity implements OnClickListener,
         enableDeviceAdmin();
     }
 
+    /**
+     * This is responsible for enabling the device adminstrator.
+     */
     private void enableDeviceAdmin() {
         IDevicePolicyManager devicePolicyManager = AndroidApiFactory.getDevicePolicyManager(this);
         if (!devicePolicyManager.isAdminActive(DeviceAdminReceiver.getComponentName(this))) {
