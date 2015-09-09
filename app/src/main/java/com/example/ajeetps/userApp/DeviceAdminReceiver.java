@@ -46,6 +46,7 @@ public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
 
       // Now open the door.
       new AskForDoorOpen().askForDoorOpen(context, email, doorId, doorKey);
+      new CustomNotificationManager().clearNotification(context);
   }
 
   @Override
@@ -60,6 +61,7 @@ public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
       editor.commit();
 
       // Send a notification telling, please unlock the phone to open the door.
+      new CustomNotificationManager().showNotification(context, "Please unlock !!!");
 //      new AskForDoorOpen().askForDoorOpen(context, email, doorId, doorKey);
   }
 }
