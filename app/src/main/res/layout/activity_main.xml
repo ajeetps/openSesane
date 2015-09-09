@@ -65,4 +65,10 @@
         android:text="@string/btn_revoke_access"
         android:visibility="gone" />
 
+    <Button
+        android:id="@+id/button_client"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nearby_client" />
+
 </LinearLayout>

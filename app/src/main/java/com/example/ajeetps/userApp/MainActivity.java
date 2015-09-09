@@ -19,6 +19,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -40,6 +46,8 @@ import com.google.android.gms.nearby.messages.MessageListener;
 import com.google.android.gms.nearby.messages.NearbyMessagesStatusCodes;
 import com.google.android.gms.nearby.messages.Strategy;
 import com.google.android.gms.nearby.messages.Message;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends Activity implements OnClickListener,
         ConnectionCallbacks, OnConnectionFailedListener {
@@ -65,7 +73,7 @@ public class MainActivity extends Activity implements OnClickListener,
     private ConnectionResult mConnectionResult;
 
     private SignInButton btnSignIn;
-    private Button btnSignOut, btnRevokeAccess;
+    private Button btnSignOut, btnRevokeAccess, btnnearByClient;
     private ImageView imgProfilePic;
     private TextView txtName, txtEmail;
     private LinearLayout llProfileLayout;
@@ -79,6 +87,7 @@ public class MainActivity extends Activity implements OnClickListener,
         btnSignIn = (SignInButton) findViewById(R.id.btn_sign_in);
         btnSignOut = (Button) findViewById(R.id.btn_sign_out);
         btnRevokeAccess = (Button) findViewById(R.id.btn_revoke_access);
+        btnnearByClient = (Button) findViewById(R.id.button_client);
         imgProfilePic = (ImageView) findViewById(R.id.imgProfilePic);
         txtName = (TextView) findViewById(R.id.txtName);
         txtEmail = (TextView) findViewById(R.id.txtEmail);
@@ -88,6 +97,7 @@ public class MainActivity extends Activity implements OnClickListener,
         btnSignIn.setOnClickListener(this);
         btnSignOut.setOnClickListener(this);
         btnRevokeAccess.setOnClickListener(this);
+        btnnearByClient.setOnClickListener(this);
 
 //        mGoogleApiClient = new GoogleApiClient.Builder(this)
 //                .addConnectionCallbacks(this)
@@ -269,8 +279,13 @@ public class MainActivity extends Activity implements OnClickListener,
                         Account account = new Account(accountName, GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
                         String scopes = "audience:server:client_id:" + "7158014523-4mmqj2i9ah7j6kp5u7gse48elada74j8.apps.googleusercontent.com"; // Not the app's client ID.
                         String Auth ="";
-                        GoogleAccountCredential credential;
+//                        GoogleAccountCredential credential;
+//                        String[] SCOPES = { TasksScopes.TASKS_READONLY , TasksScopes.TASKS};
+//
+//                        credential = GoogleAccountCredential.usingOAuth2( getApplicationContext(), Arrays.asList(SCOPES)) .setBackOff(new ExponentialBackOff()) .setSelectedAccountName(accountName);
+
                         try {
+                           // Log.e(TAG,credential.getToken().toString() + " ajeet 11");
 
                             Log.e(TAG, "signing in 9");
                             Auth = GoogleAuthUtil.getToken(getApplicationContext(), account, scopes);
@@ -303,6 +318,40 @@ public class MainActivity extends Activity implements OnClickListener,
 
                 new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
 
+                URL url = new URL("http://yoururl.com");
+                String response = "";
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                HashMap<String, String> params = new HashMap<String, String>();
+
+                params.put("firstParam", "aabc");
+
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(params));
+                writer.flush();
+                writer.close();
+                os.close();
+
+                int responseCode=conn.getResponseCode();
+
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    while ((line=br.readLine()) != null) {
+                        response+=line;
+                    }
+                }
+                else {
+                    response="";
+                }
+
             } else {
                 Log.e(TAG, "signing in 10");
                 Toast.makeText(getApplicationContext(),
@@ -311,6 +360,23 @@ public class MainActivity extends Activity implements OnClickListener,
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException{
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(Map.Entry<String, String> entry : params.entrySet()){
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+        }
+
+        return result.toString();
     }
 
     @Override
@@ -343,6 +409,10 @@ public class MainActivity extends Activity implements OnClickListener,
             case R.id.btn_revoke_access:
                 // Revoke access button clicked
                 revokeGplusAccess();
+                break;
+            case R.id.button_client:
+                // Invoke NearbyClient
+                invokeNearByClient();
                 break;
         }
     }
@@ -390,9 +460,14 @@ public class MainActivity extends Activity implements OnClickListener,
         }
     }
 
-    /**
-     * Background Async task to load user profile picture from url
-     * */
+    private void invokeNearByClient() {
+        Log.i(TAG, "Kishore: Starting Client Activity");
+        Intent detailIntent = new Intent(this, NearByClientActivity.class);
+        startActivity(detailIntent);
+    }
+        /**
+         * Background Async task to load user profile picture from url
+         * */
     private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
