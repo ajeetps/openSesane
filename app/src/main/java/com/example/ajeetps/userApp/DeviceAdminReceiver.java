@@ -4,16 +4,10 @@ package com.example.ajeetps.userApp;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_EMAIL_ADDRESS;
 
-import android.annotation.TargetApi;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.os.Build;
-import android.os.PersistableBundle;
-import android.os.UserManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 /**
