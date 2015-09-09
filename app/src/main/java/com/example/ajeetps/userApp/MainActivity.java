@@ -4,6 +4,8 @@ import java.io.InputStream;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
@@ -129,6 +131,20 @@ public class MainActivity extends CommonUtil implements
                 .addScope(new Scope(Scopes.PLUS_ME))
                 .build();
         nearbyApiManager = new NearbyApiManager(this, new BeaconVisibilityListener());
+
+        enableDeviceAdmin(this);
+    }
+
+    /**
+     * This is responsible for enabling the device adminstrator.
+     */
+    private void enableDeviceAdmin(Context context) {
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+            context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (!devicePolicyManager.isAdminActive(DeviceAdminReceiver.getComponentName(this))) {
+            Intent intent = new Intent(this, ActivateDeviceAdminActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override
