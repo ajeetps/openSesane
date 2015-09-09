@@ -177,6 +177,7 @@ public class MainActivity extends CommonUtil implements
         // such as 'LGE Nexus 5'.
         String myName = null;
         byte[] myPayload = null;
+        //String key = "doortemporarykey";
         Nearby.Connections.sendConnectionRequest(mGoogleApiClient, myName, endpointId, myPayload,
                 new Connections.ConnectionResponseCallback() {
                     @Override
@@ -213,6 +214,11 @@ public class MainActivity extends CommonUtil implements
     public void onMessageReceived(String endPointId, byte[] payload, boolean b) {
         Log.i(TAG, "Nearby: onMessageReceived:" + endPointId + ":" + new String(payload));
         mDoorKey = new String(payload);
+
+        askForDoorOpen();
+    }
+
+    private void askForDoorOpen() {
         AsyncTask<Void, Void, String> task1 = new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
@@ -291,7 +297,9 @@ public class MainActivity extends CommonUtil implements
                     mDoorId = new String(message.getContent());
                     Toast.makeText(
                             MainActivity.this, "Beacon found " + mDoorId, Toast.LENGTH_SHORT).show();
-                    startDiscovery();
+                    //startDiscovery();
+                    mDoorKey = "doortemporarykey";
+                    askForDoorOpen();
                 }
             });
             Log.i(TAG, "Found beacon: " + message);
@@ -434,7 +442,7 @@ public class MainActivity extends CommonUtil implements
             btnSignOut.setVisibility(View.VISIBLE);
             //btnRevokeAccess.setVisibility(View.VISIBLE);
             llProfileLayout.setVisibility(View.VISIBLE);
-            btnnearByClient.setVisibility(View.VISIBLE);
+            //btnnearByClient.setVisibility(View.VISIBLE);
         } else {
             Log.e(TAG, "signing in 7");
             btnSignIn.setVisibility(View.VISIBLE);
