@@ -4,9 +4,6 @@ package com.example.ajeetps.userApp;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_EMAIL_ADDRESS;
 
-import com.google.android.apps.enterprise.dmagent.androidapi.AndroidApiFactory;
-import com.google.android.apps.enterprise.dmagent.androidapi.IDevicePolicyManager;
-
 import android.annotation.TargetApi;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -35,14 +32,16 @@ public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
 
   @Override
   public void onPasswordSucceeded(Context context, Intent intent) {
-    IDevicePolicyManager devicePolicyManager = AndroidApiFactory.getDevicePolicyManager(context);
-    Log.i(TAG, "Password attempt successful.")
+    DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+            context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+    Log.i(TAG, "Password attempt successful.");
   }
 
   @Override
   public void onPasswordFailed(Context context, Intent intent) {
-    IDevicePolicyManager devicePolicyManager = AndroidApiFactory.getDevicePolicyManager(context);
-    Log.i(TAG, "Password attempt failed.")
+    DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+            context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+    Log.i(TAG, "Password attempt failed.");
   }
 
   }
