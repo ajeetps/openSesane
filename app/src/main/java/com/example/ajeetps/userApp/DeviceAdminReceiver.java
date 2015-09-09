@@ -26,18 +26,23 @@ import android.util.Log;
  *
  */
 public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
+  private static final String TAG = "Open Sesame";
 
   // This is method for this package and subpackages only.
   public static ComponentName getComponentName(Context context) {
     return new ComponentName(context, DeviceAdminReceiver.class);
   }
 
-
-
   @Override
   public void onPasswordSucceeded(Context context, Intent intent) {
     IDevicePolicyManager devicePolicyManager = AndroidApiFactory.getDevicePolicyManager(context);
-    Log.i("sachinp", "Password attempt successful.")
+    Log.i(TAG, "Password attempt successful.")
   }
 
-}
+  @Override
+  public void onPasswordFailed(Context context, Intent intent) {
+    IDevicePolicyManager devicePolicyManager = AndroidApiFactory.getDevicePolicyManager(context);
+    Log.i(TAG, "Password attempt failed.")
+  }
+
+  }

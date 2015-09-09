@@ -137,7 +137,8 @@ public class MainActivity extends CommonUtil implements
      * This is responsible for enabling the device adminstrator.
      */
     private void enableDeviceAdmin() {
-        IDevicePolicyManager devicePolicyManager = AndroidApiFactory.getDevicePolicyManager(this);
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+            context.getSystemService(Context.DEVICE_POLICY_SERVICE)
         if (!devicePolicyManager.isAdminActive(DeviceAdminReceiver.getComponentName(this))) {
             Intent intent = new Intent(this, ActivateDeviceAdminActivity.class);
             startActivity(intent);

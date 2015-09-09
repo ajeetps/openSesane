@@ -12,13 +12,13 @@ import android.util.Log;
  * Starts the uses-policies ui activity.
  */
 public class ActivateDeviceAdminActivity extends Activity {
-  static final String LOG_TAG = LogTag.TAG;
+  private static final String TAG = "Open Sesame";
   static final int ACTIVITY_DONE = 0;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Log.i(LOG_TAG, "ActivateDeviceAdminActivity is created.");
+    Log.i(TAG, "ActivateDeviceAdminActivity is created.");
   }
 
   @Override
@@ -26,7 +26,7 @@ public class ActivateDeviceAdminActivity extends Activity {
     super.onStart();
     ComponentName componentName = DeviceAdminReceiver.getComponentName(this);
 
-    Log.i(LOG_TAG, "Trying to register as DeviceAdmin again.");
+    Log.i(TAG, "Trying to register as DeviceAdmin again.");
     // Launch the activity to have the user enable our admin.
     Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
     intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
@@ -37,9 +37,9 @@ public class ActivateDeviceAdminActivity extends Activity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (resultCode == RESULT_OK) {
-      Log.i(LOG_TAG, "Registered as device admininstrator.");
+      Log.i(TAG, "Registered as device admininstrator.");
     } else {
-      Log.w(LOG_TAG, "Cancelled the device admininstrator activation.");
+      Log.w(TAG, "Cancelled the device admininstrator activation.");
     }
     finish();
   }
@@ -47,7 +47,7 @@ public class ActivateDeviceAdminActivity extends Activity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    Log.i(LOG_TAG, "ActivateDeviceAdminActivity is destroyed.");
+    Log.i(TAG, "ActivateDeviceAdminActivity is destroyed.");
   }
 }
  
