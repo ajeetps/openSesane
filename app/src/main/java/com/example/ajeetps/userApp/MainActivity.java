@@ -418,7 +418,7 @@ public class MainActivity extends CommonUtil implements
             btnSignOut.setVisibility(View.VISIBLE);
             //btnRevokeAccess.setVisibility(View.VISIBLE);
             llProfileLayout.setVisibility(View.VISIBLE);
-            btnnearByClient.setVisibility(View.VISIBLE);
+            //btnnearByClient.setVisibility(View.VISIBLE);
         } else {
             Log.e(TAG, "signing in 7");
             btnSignIn.setVisibility(View.VISIBLE);
